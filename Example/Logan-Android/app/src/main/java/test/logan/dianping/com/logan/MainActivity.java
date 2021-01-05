@@ -23,12 +23,15 @@
 package test.logan.dianping.com.logan;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -39,6 +42,13 @@ import com.dianping.logan.SendLogCallback;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -50,6 +60,13 @@ public class MainActivity extends Activity {
     private TextView mTvInfo;
     private EditText mEditIp;
     private RealSendLogRunnable mSendLogRunnable;
+
+    private OnFocusChangeListener mButtonOnFocusChangeListener = new OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            v.setBackgroundColor(hasFocus ? Color.BLUE : Color.BLACK);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +81,15 @@ public class MainActivity extends Activity {
         Button batchBtn = (Button) findViewById(R.id.write_batch_btn);
         Button sendBtn = (Button) findViewById(R.id.send_btn);
         Button logFileBtn = (Button) findViewById(R.id.show_log_file_btn);
+
+        Button send_btn_default = (Button) findViewById(R.id.send_btn_default);
+        send_btn_default.setOnFocusChangeListener(mButtonOnFocusChangeListener);
+
+        button.setOnFocusChangeListener(mButtonOnFocusChangeListener);
+        batchBtn.setOnFocusChangeListener(mButtonOnFocusChangeListener);
+        sendBtn.setOnFocusChangeListener(mButtonOnFocusChangeListener);
+        logFileBtn.setOnFocusChangeListener(mButtonOnFocusChangeListener);
+
         mTvInfo = (TextView) findViewById(R.id.info);
         mEditIp = (EditText) findViewById(R.id.send_ip);
 
@@ -139,6 +165,12 @@ public class MainActivity extends Activity {
                         entry.getValue()).append("\n");
             }
             mTvInfo.setText(info.toString());
+
+            try {
+                parseLoganFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -163,4 +195,39 @@ public class MainActivity extends Activity {
             }
         });
     }
+
+
+    private void parseLoganFile() throws IOException {
+        String encryptedDir = getApplicationContext().getExternalFilesDir(null).getAbsolutePath()
+                + File.separator;
+        File dir = new File(encryptedDir);
+        if (!dir.exists()) {
+            return;
+        }
+        File[] files = dir.listFiles();
+        if (files == null) {
+            return;
+        }
+
+        byte[] encryptKey16 = "0123456789012345".getBytes();
+        byte[] encryptIv16 = "0123456789012345".getBytes();
+
+        for (int i = 0; i < files.length; i++) {
+            String encryptedFilePath = files[i].getAbsolutePath();
+            if (encryptedFilePath.endsWith("de")) {
+                continue;
+            }
+            String dencryptedFilePath = encryptedFilePath + "de";
+            LoganParser loganParser = new LoganParser(encryptKey16, encryptIv16);
+            File encryptedFile = new File(encryptedFilePath);
+            InputStream inputStream = new FileInputStream(encryptedFile);
+
+            File dencryptedFile = new File(dencryptedFilePath);
+            OutputStream outputStream = new FileOutputStream(dencryptedFile);
+            loganParser.parse(inputStream, outputStream);
+            inputStream.close();
+            outputStream.close();
+        }
+    }
+
 }
