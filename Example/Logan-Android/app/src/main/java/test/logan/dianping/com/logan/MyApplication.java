@@ -7,20 +7,27 @@ import com.dianping.logan.Logan;
 import com.dianping.logan.LoganConfig;
 import com.dianping.logan.OnLoganProtocolStatus;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 public class MyApplication extends Application {
 
     private static final String TAG = MyApplication.class.getName();
-    private static final String FILE_NAME = "logan_v1";
+    public static final String FILE_NAME = "logan_v1";
 
     @Override
     public void onCreate() {
         super.onCreate();
         initLogan();
-        Logan.w("MyApplication onCreate", 3);
-        Logan.w("MyApplication onCreate", 3);
-        Logan.w("MyApplication onCreate", 3);
+        String processName = getProcessName();
+        Logan.w(processName + " MyApplication onCreate", 3);
+        Logan.w(processName + " MyApplication onCreate", 3);
+        Logan.w(processName + " MyApplication onCreate", 3);
     }
 
     private void initLogan() {
@@ -40,5 +47,37 @@ public class MyApplication extends Application {
             }
         });
 
+    }
+
+    public static String getProcessName() {
+        BufferedReader cmdlineReader = null;
+        try {
+            cmdlineReader = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(
+                            "/proc/" + android.os.Process.myPid() + "/cmdline"),
+                    "iso-8859-1"));
+            int c;
+            StringBuilder processName = new StringBuilder();
+            while ((c = cmdlineReader.read()) > 0) {
+                processName.append((char) c);
+            }
+            return processName.toString();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (cmdlineReader != null) {
+                try {
+                    cmdlineReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return "";
     }
 }

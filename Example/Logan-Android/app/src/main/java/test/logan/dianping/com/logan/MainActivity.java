@@ -61,6 +61,8 @@ public class MainActivity extends Activity {
     private EditText mEditIp;
     private RealSendLogRunnable mSendLogRunnable;
 
+    private String processName;
+
     private OnFocusChangeListener mButtonOnFocusChangeListener = new OnFocusChangeListener() {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
@@ -74,6 +76,15 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         initView();
         mSendLogRunnable = new RealSendLogRunnable();
+
+        processName = MyApplication.getProcessName();
+
+        // start service -> new process
+        Intent intent = new Intent("test.logan.dianping.com.logan.action.SERVICE");
+        intent.setPackage(getPackageName());
+        startService(intent);
+
+        loganTest();
     }
 
     private void initView() {
@@ -96,7 +107,7 @@ public class MainActivity extends Activity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Logan.w("啊哈哈哈哈66666", 2);
+                Logan.w(processName + " 啊哈哈哈哈66666", 2);
             }
         });
         batchBtn.setOnClickListener(new View.OnClickListener() {
@@ -131,15 +142,16 @@ public class MainActivity extends Activity {
             public void run() {
                 super.run();
                 try {
-                    for (int i = 0; i < 9; i++) {
+                    for (int i = 0; i < 900; i++) {
                         Log.d(TAG, "times : " + i);
-                        Logan.w(String.valueOf(i), 1);
-                        Thread.sleep(5);
+                        Logan.w(processName + " " + i, 1);
+                        Thread.sleep(50);
                     }
                     Log.d(TAG, "write log end");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                Logan.f();
             }
         }.start();
     }
@@ -199,7 +211,7 @@ public class MainActivity extends Activity {
 
     private void parseLoganFile() throws IOException {
         String encryptedDir = getApplicationContext().getExternalFilesDir(null).getAbsolutePath()
-                + File.separator;
+                + File.separator + MyApplication.FILE_NAME;
         File dir = new File(encryptedDir);
         if (!dir.exists()) {
             return;
