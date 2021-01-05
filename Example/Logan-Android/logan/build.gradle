@@ -5,10 +5,12 @@ android {
 //    publishNonDefault true
 
     compileSdkVersion 23
-    buildToolsVersion "25.0.2"
+//    buildToolsVersion "25.0.2"
+    buildToolsVersion "29.0.2"
 
     defaultConfig {
-        minSdkVersion 14
+//        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -38,12 +40,24 @@ android {
             path "CMakeLists.txt"
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    publishNonDefault true
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    api fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.1'
+}
+
+configurations {
+    // Expose the debug version of the library to other modules
+    debug
+    release
 }

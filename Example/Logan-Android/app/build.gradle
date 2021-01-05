@@ -2,10 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "25.0.2"
+//    buildToolsVersion "25.0.2"
+    buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "test.logan.dianping.com.logan"
-        minSdkVersion 14
+//        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -16,16 +18,29 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+
+        debug {
+            debuggable true
+            jniDebuggable true
+        }
     }
+
+    lintOptions {
+        abortOnError false
+    }
+
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testCompile 'junit:junit:4.12'
-    compile project(':logan')
+    testImplementation 'junit:junit:4.13.1'
+    implementation project(':logan')
+
+    releaseImplementation project(path: ':logan', configuration: 'release')
+    debugImplementation project(path: ':logan', configuration: 'debug')
 //    compile 'com.dianping.android.sdk:logan:1.1.0'
 //    releaseCompile project(path: ':logan', configuration: 'release')
 //    debugCompile project(path: ':logan', configuration: 'debug')
